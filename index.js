@@ -25,8 +25,6 @@ async function run(){
 
         const taskCollection = client.db('easyTaskManager').collection('task')
 
-        // const categoryCollection = client.db('brightPhotography').collection('category')
-        // const reviewCollection  = client.db('brightPhotography').collection('review')
 
 
         
@@ -40,56 +38,72 @@ async function run(){
         })
 
         app.get('/mytask',async (req,res)=>{
-            const query = {};
+
+            const email = req.query.email;
+            const currentCondition = 'pending';
+            const query = {
+                email:email,
+                condition:currentCondition
+            };
             const cursor = taskCollection.find(query)
             const task = await cursor.toArray()
             res.send(task);
         })
 
-        // // homopage category
-        // app.get('/minicategory',async (req,res)=>{
-        //     const query = {};
-        //     const cursor = categoryCollection.find(query)
-        //     const category = await cursor.limit(3).toArray()
-        //     res.send(category);
-        // })
+        app.get('/completetask',async (req,res)=>{
 
+            const email = req.query.email;
+            const currentCondition = 'completed';
+            const query = {
+                email:email,
+                condition:currentCondition
+            };
+            const cursor = taskCollection.find(query)
+            const task = await cursor.toArray()
+            res.send(task);
+        })
 
-        // // service section
-        // app.get('/services/:id',async (req,res)=>{
-        //     const id = req.params.id;
-        //     const query = {_id:ObjectId(id)}
-        //     const service = await categoryCollection.findOne(query)
-        //     res.send(service)
-        // })
-
-
-        // // review section
-        // app.post('/review',async (req,res)=>{
-        //     const review = req.body;
-        //     const result = await reviewCollection.insertOne(review);
-        //     console.log(result)
-        //     res.send(result)
-
-        // })
-
-
-        // app.get('/myreview',async(req,res)=>{
-        //     let query = {};
+    
+        app.post('/update1',async (req,res)=>{
+            const id = req.query.id;
+            console.log('Update id ',id)
             
-        //     if(req.query.email){
-        //         query = {
-        //             email : req.query.email
-        //         }
-        //     }
+          if(id){  const filter = {_id:ObjectId(id)}
+          const options = {upsert:true}
+          const updateDoc = {
+              $set : {
+                  condition : 'completed'
+              }
+          }
 
-        //     console.log(req.query.email)
-        //     const cursor = reviewCollection.find(query)
-        //     const review = await cursor.toArray()
-        //     console.log(review)
-        //     res.send(review)
+          const result = await taskCollection.updateOne(filter,updateDoc,options);
+          res.send(result)}
+        })
+        app.post('/update2',async (req,res)=>{
+            const id = req.query.id;
+            console.log('Update id ',id)
+            
+          if(id){  const filter = {_id:ObjectId(id)}
+          const options = {upsert:true}
+          const updateDoc = {
+              $set : {
+                  condition : 'pending'
+              }
+          }
 
-        // })
+          const result = await taskCollection.updateOne(filter,updateDoc,options);
+          res.send(result)}
+        })
+        app.post('/delete1',async (req,res)=>{
+            const id = req.query.id;
+            console.log('delete id ',id)
+            
+          if(id){  
+            const query = {_id:ObjectId(id)}
+
+          const result = await taskCollection.deleteOne(query);
+          res.send(result)}
+        })
     }
 
     finally{
